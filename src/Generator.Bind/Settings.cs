@@ -19,7 +19,7 @@ namespace Bind
         }
 
         public string DefaultInputPath = "src/Generator.Bind/Specifications";
-        public string DefaultOutputPath = "src/OpenTK/Graphics/OpenGL";
+        public string DefaultOutputPath = "src/OpenTK.Graphics/OpenGL";
         public string DefaultOutputNamespace = "OpenTK.Graphics.OpenGL";
         public string DefaultDocPath = "src/Generator.Bind/Specifications/Docs";
         public string DefaultFallbackDocPath = "src/Generator.Bind/Specifications/Docs/GL";
