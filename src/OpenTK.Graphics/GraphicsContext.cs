@@ -65,6 +65,8 @@ namespace OpenTK.Graphics
         private readonly static Dictionary<ContextHandle, IGraphicsContext> available_contexts =
             new Dictionary<ContextHandle, IGraphicsContext>();
 
+//TODO: Creating GraphicsContext not supported at the moment
+#if FALSE
         /// <summary>
         /// Constructs a new GraphicsContext with the specified GraphicsMode and attaches it to the specified window.
         /// </summary>
@@ -226,7 +228,7 @@ namespace OpenTK.Graphics
 
             // Make sure OpenTK has been initialized.
             // Fixes https://github.com/opentk/opentk/issues/52
-            Toolkit.Init();
+            // TODO: Toolkit.Init();
 
             lock (SyncRoot)
             {
@@ -277,6 +279,7 @@ namespace OpenTK.Graphics
         public GraphicsContext(ContextHandle handle, IWindowInfo window, IGraphicsContext shareContext, int major, int minor, GraphicsContextFlags flags)
             : this(handle, Platform.Utilities.CreateGetAddress(), Factory.Default.CreateGetCurrentGraphicsContext())
         { }
+#endif
 
         /// <summary>
         /// Returns a <see cref="System.String"/> representing this instance.
