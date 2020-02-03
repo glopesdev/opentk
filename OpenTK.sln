@@ -47,7 +47,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTK.Audio", "src\OpenTK.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTK.Graphics", "src\OpenTK.Graphics\OpenTK.Graphics.csproj", "{1E01390E-B8BC-4B30-8ECB-BC11E937F445}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTK.Window.Desktop", "src\OpenTK.Window\OpenTK.Window.Desktop.csproj", "{26FFD017-EC2A-4976-A09A-32F14B8C7FD7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTK.Window", "src\OpenTK.Window\OpenTK.Window.csproj", "{26FFD017-EC2A-4976-A09A-32F14B8C7FD7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "props", "props", "{F9D8840A-418E-477D-A7FE-AB92EDCA4D80}"
 	ProjectSection(SolutionItems) = preProject

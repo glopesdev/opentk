@@ -1,31 +1,17 @@
-﻿ //
- // The Open Toolkit Library License
- //
- // Copyright (c) 2006 - 2009 the Open Toolkit library.
- //
- // Permission is hereby granted, free of charge, to any person obtaining a copy
- // of this software and associated documentation files (the "Software"), to deal
- // in the Software without restriction, including without limitation the rights to
- // use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- // the Software, and to permit persons to whom the Software is furnished to do
- // so, subject to the following conditions:
- //
- // The above copyright notice and this permission notice shall be included in all
- // copies or substantial portions of the Software.
- //
- // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
- // OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- // OTHER DEALINGS IN THE SOFTWARE.
- //
+﻿//
+// KeyboardState.cs
+//
+// Copyright (C) 2018 OpenTK
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+//
 
 using System;
+using System.Diagnostics;
+using System.Text;
 
-namespace OpenTK.Input
+namespace OpenTK.Window.Input
 {
     /// <summary>
     /// Encapsulates the state of a Keyboard device.
@@ -33,90 +19,64 @@ namespace OpenTK.Input
     public struct KeyboardState : IEquatable<KeyboardState>
     {
         // Allocate enough ints to store all keyboard keys
-        private const int IntSize = sizeof(int) * 8;
+        private const int IntSize = 32;
 
-        private const int NumInts = ((int)Key.LastKey + IntSize - 1) / IntSize;
-        // The following line triggers bogus CS0214 in gmcs 2.0.1, sigh...
-        private unsafe fixed int Keys[NumInts];
+        private const int NumInts = ((int)Key.LastKey / IntSize) + 1;
+
+        private unsafe fixed int _keys[NumInts];
 
         /// <summary>
-        /// Gets a <see cref="System.Boolean"/> indicating whether the specified
-        /// <see cref="OpenTK.Input.Key"/> is pressed.
+        /// Gets a <see cref="bool" /> indicating whether the specified
+        ///  <see cref="Key" /> is currently down.
         /// </summary>
-        /// <param name="key">The <see cref="OpenTK.Input.Key"/> to check.</param>
-        /// <returns>True if key is pressed; false otherwise.</returns>
+        /// <param name="key">The <see cref="Key" /> to check.</param>
+        /// <returns><c>true</c> if key is down; <c>false</c> otherwise.</returns>
         public bool this[Key key]
         {
-            get { return IsKeyDown(key); }
-            internal set { SetKeyState(key, value); }
+            get => IsKeyDown(key);
+            set => SetKeyState(key, value);
         }
 
         /// <summary>
-        /// Gets a <see cref="System.Boolean"/> indicating whether the specified
-        /// <see cref="OpenTK.Input.Key"/> is pressed.
+        /// Gets a <see cref="bool" /> indicating whether this key is currently down.
         /// </summary>
-        /// <param name="code">The scancode to check.</param>
-        /// <returns>True if code is pressed; false otherwise.</returns>
-        public bool this[short code]
-        {
-            get { return IsKeyDown((Key)code); }
-        }
-
-        /// <summary>
-        /// Gets a <see cref="System.Boolean"/> indicating whether this key is down.
-        /// </summary>
-        /// <param name="key">The <see cref="OpenTK.Input.Key"/> to check.</param>
+        /// <param name="key">The <see cref="Key" /> to check.</param>
+        /// <returns><c>true</c> if <paramref name="key"/> is in the down state; otherwise, <c>false</c>.</returns>
         public bool IsKeyDown(Key key)
         {
-            return ReadBit((int)key);
+            var (intOffset, bitOffset) = GetOffsets(key);
+
+            unsafe
+            {
+                return (this._keys[intOffset] & (1 << bitOffset)) != 0;
+            }
         }
 
         /// <summary>
-        /// Gets a <see cref="System.Boolean"/> indicating whether this scan code is down.
+        /// Gets a <see cref="bool" /> indicating whether this key is currently up.
         /// </summary>
-        /// <param name="code">The scan code to check.</param>
-        public bool IsKeyDown(short code)
-        {
-            return code >= 0 && code < (short)Key.LastKey && ReadBit(code);
-        }
-
-        /// <summary>
-        /// Gets a <see cref="System.Boolean"/> indicating whether this key is up.
-        /// </summary>
-        /// <param name="key">The <see cref="OpenTK.Input.Key"/> to check.</param>
+        /// <param name="key">The <see cref="Key" /> to check.</param>
+        /// <returns><c>true</c> if <paramref name="key"/> is in the up state; otherwise, <c>false</c>.</returns>
         public bool IsKeyUp(Key key)
         {
-            return !ReadBit((int)key);
+            return !IsKeyDown(key);
         }
 
         /// <summary>
-        /// Gets a <see cref="System.Boolean"/> indicating whether this scan code is down.
-        /// </summary>
-        /// <param name="code">The scan code to check.</param>
-        public bool IsKeyUp(short code)
-        {
-            return !IsKeyDown(code);
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether any key is down.
+        /// Gets a value indicating whether any key is currently down.
         /// </summary>
         /// <value><c>true</c> if any key is down; otherwise, <c>false</c>.</value>
         public bool IsAnyKeyDown
         {
             get
             {
-                // If any bit is set then a key is down.
-                unsafe
+                for (var i = 0; i < NumInts; ++i)
                 {
-                    fixed (int* k = Keys)
+                    unsafe
                     {
-                        for (int i = 0; i < NumInts; ++i)
+                        if (this._keys[i] != 0)
                         {
-                            if (k[i] != 0)
-                            {
-                                return true;
-                            }
+                            return true;
                         }
                     }
                 }
@@ -126,35 +86,41 @@ namespace OpenTK.Input
         }
 
         /// <summary>
-        /// Gets a <see cref="System.Boolean"/> indicating whether this keyboard
-        /// is connected.
+        /// Sets the key state of the <paramref name="key"/> depending on the given <paramref name="down"/> value.
         /// </summary>
-        public bool IsConnected { get; internal set; }
-
-#if false
-        // Disabled until the correct cross-platform API can be determined.
-        public bool IsLedOn(KeyboardLeds led)
+        /// <param name="key">The <see cref="Key"/> which state should be changed.</param>
+        /// <param name="down">The new state the key should be changed to.</param>
+        public void SetKeyState(Key key, bool down)
         {
-            return false;
-        }
+            var (intOffset, bitOffset) = GetOffsets(key);
 
-        public bool IsLedOff(KeyboardLeds led)
-        {
-            return false;
+            if (down)
+            {
+                unsafe
+                {
+                    this._keys[intOffset] |= 1 << bitOffset;
+                }
+            }
+            else
+            {
+                unsafe
+                {
+                    this._keys[intOffset] &= ~(1 << bitOffset);
+                }
+            }
         }
-#endif
 
         /// <summary>
         /// Checks whether two <see cref="KeyboardState" /> instances are equal.
         /// </summary>
         /// <param name="left">
-        /// A <see cref="KeyboardState"/> instance.
+        /// The first <see cref="KeyboardState" /> instance to compare.
         /// </param>
         /// <param name="right">
-        /// A <see cref="KeyboardState"/> instance.
+        /// The second <see cref="KeyboardState" /> instance to compare.
         /// </param>
         /// <returns>
-        /// True if both left is equal to right; false otherwise.
+        /// <c>true</c> if both left is equal to right; <c>false</c> otherwise.
         /// </returns>
         public static bool operator ==(KeyboardState left, KeyboardState right)
         {
@@ -165,13 +131,13 @@ namespace OpenTK.Input
         /// Checks whether two <see cref="KeyboardState" /> instances are not equal.
         /// </summary>
         /// <param name="left">
-        /// A <see cref="KeyboardState"/> instance.
+        /// The first <see cref="KeyboardState" /> instance to compare.
         /// </param>
         /// <param name="right">
-        /// A <see cref="KeyboardState"/> instance.
+        /// The second <see cref="KeyboardState" /> instance to compare.
         /// </param>
         /// <returns>
-        /// True if both left is not equal to right; false otherwise.
+        /// <c>true</c> if both left is not equal to right; <c>false</c> otherwise.
         /// </returns>
         public static bool operator !=(KeyboardState left, KeyboardState right)
         {
@@ -182,114 +148,93 @@ namespace OpenTK.Input
         /// Compares to an object instance for equality.
         /// </summary>
         /// <param name="obj">
-        /// The <see cref="System.Object"/> to compare to.
+        /// The <see cref="object" /> to compare to.
         /// </param>
         /// <returns>
-        /// True if this instance is equal to obj; false otherwise.
+        /// <c>true</c> if this instance is equal to obj; <c>false</c> otherwise.
         /// </returns>
         public override bool Equals(object obj)
         {
-            if (obj is KeyboardState)
+            if (obj is KeyboardState state)
             {
-                return this == (KeyboardState)obj;
+                return Equals(state);
             }
-            else
+
+            return false;
+        }
+
+        /// <summary>
+        /// Compares two KeyboardState instances.
+        /// </summary>
+        /// <param name="other">The instance to compare two.</param>
+        /// <returns><c>true</c>, if both instances are equal; <c>false</c> otherwise.</returns>
+        public bool Equals(KeyboardState other)
+        {
+            for (var i = 0; i < NumInts; i++)
             {
-                return false;
+                unsafe
+                {
+                    if (this._keys[i] != other._keys[i])
+                    {
+                        return false;
+                    }
+                }
             }
+
+            return true;
         }
 
         /// <summary>
         /// Generates a hashcode for the current instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.Int32"/> represting the hashcode for this instance.
+        /// A <see cref="int" /> representing the hashcode for this instance.
         /// </returns>
         public override int GetHashCode()
         {
-            unsafe
+            var hashcode = 0;
+            for (var i = 0; i < NumInts; i++)
             {
-                fixed (int* k = Keys)
+                unsafe
                 {
-                    int hashcode = 0;
-                    for (int i = 0; i < NumInts; i++)
-                    {
-                        hashcode ^= (k + i)->GetHashCode();
-                    }
-                    return hashcode;
+                    hashcode ^= 397 * this._keys[i];
                 }
             }
+
+            return hashcode;
         }
 
-        internal void SetKeyState(Key key, bool down)
+        /// <inheritdoc />
+        public override string ToString()
         {
-            if (down)
+            var builder = new StringBuilder();
+            builder.Append('{');
+            var first = true;
+
+            for (var key = (Key)1; key <= Key.LastKey; ++key)
             {
-                EnableBit((int)key);
-            }
-            else
-            {
-                DisableBit((int)key);
-            }
-        }
-
-        internal bool ReadBit(int offset)
-        {
-            ValidateOffset(offset);
-
-            int int_offset = offset / IntSize;
-            int bit_offset = offset % IntSize;
-            unsafe
-            {
-                fixed (int* k = Keys) { return (*(k + int_offset) & (1 << bit_offset)) != 0u; }
-            }
-        }
-
-        internal void EnableBit(int offset)
-        {
-            ValidateOffset(offset);
-
-            int int_offset = offset / IntSize;
-            int bit_offset = offset % IntSize;
-            unsafe
-            {
-                fixed (int* k = Keys) { *(k + int_offset) |= 1 << bit_offset; }
-            }
-        }
-
-        internal void DisableBit(int offset)
-        {
-            ValidateOffset(offset);
-
-            int int_offset = offset / IntSize;
-            int bit_offset = offset % IntSize;
-            unsafe
-            {
-                fixed (int* k = Keys) { *(k + int_offset) &= ~(1 << bit_offset); }
-            }
-        }
-
-        internal void MergeBits(KeyboardState other)
-        {
-            unsafe
-            {
-                int* k2 = other.Keys;
-                fixed (int* k1 = Keys)
+                if (IsKeyDown(key))
                 {
-                    for (int i = 0; i < NumInts; i++)
+                    if (!first)
                     {
-                        *(k1 + i) |= *(k2 + i);
+                        builder.Append(',');
                     }
+                    else
+                    {
+                        first = false;
+                    }
+
+                    builder.Append(key);
                 }
             }
-            IsConnected |= other.IsConnected;
+
+            builder.Append('}');
+
+            return builder.ToString();
         }
 
-        internal void SetIsConnected(bool value)
-        {
-            IsConnected = value;
-        }
-
+        // This shouldn't be necessary but I'll keep it in just in case.
+        [Conditional("DEBUG")]
         private static void ValidateOffset(int offset)
         {
             if (offset < 0 || offset >= NumInts * IntSize)
@@ -298,26 +243,20 @@ namespace OpenTK.Input
             }
         }
 
-        /// <summary>
-        /// Compares two KeyboardState instances.
-        /// </summary>
-        /// <param name="other">The instance to compare two.</param>
-        /// <returns>True, if both instances are equal; false otherwise.</returns>
-        public bool Equals(KeyboardState other)
+        private static (int intOffset, int bitOffset) GetOffsets(Key key)
         {
-            bool equal = true;
-            unsafe
+            if (key <= Key.Unknown || key > Key.LastKey)
             {
-                int* k2 = other.Keys;
-                fixed (int* k1 = Keys)
-                {
-                    for (int i = 0; equal && i < NumInts; i++)
-                    {
-                        equal &= *(k1 + i) == *(k2 + i);
-                    }
-                }
+                throw new ArgumentOutOfRangeException(nameof(key), "Invalid key");
             }
-            return equal;
+
+            var offset = (int)key;
+            ValidateOffset(offset);
+
+            var intOffset = offset / IntSize;
+            var bitOffset = offset % IntSize;
+
+            return (intOffset, bitOffset);
         }
     }
 }

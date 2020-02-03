@@ -1,307 +1,245 @@
 ﻿//
 // JoystickState.cs
 //
-// Author:
-//       Stefanos A. <stapostol@gmail.com>
+// Copyright (C) OpenTK
 //
-// Copyright (c) 2006-2014 Stefanos Apostolopoulos
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
 //
 
 using System;
-using System.Diagnostics;
 using System.Text;
 
-namespace OpenTK.Input
+namespace OpenTK.Window.Input
 {
     /// <summary>
-    /// Describes the current state of a <see cref="JoystickDevice"/>.
+    /// Encapsulates the state of a joystick device.
     /// </summary>
     public struct JoystickState : IEquatable<JoystickState>
     {
-        // If we ever add more values to JoystickAxis or JoystickButton
-        // then we'll need to increase these limits.
-        internal const int MaxAxes = 64;
-        internal const int MaxButtons = 64;
-        internal const int MaxHats = (int)JoystickHat.Last + 1;
-
-        private const float ConversionFactor = 1.0f / (short.MaxValue + 0.5f);
-
-        private long buttons;
-        private unsafe fixed short axes[MaxAxes];
-        private JoystickHatState hat0;
-        private JoystickHatState hat1;
-        private JoystickHatState hat2;
-        private JoystickHatState hat3;
+        private Hat[] _hats;
+        private float[] _axes;
+        private byte[] _buttons;
 
         /// <summary>
-        /// Gets a value between -1.0 and 1.0 representing the current offset of the specified axis.
+        /// Gets the identity of the joystick this state describes.
         /// </summary>
-        /// <returns>
-        /// A value between -1.0 and 1.0 representing offset of the specified axis.
-        /// If the specified axis does not exist, then the return value is 0.0. Use <see cref="Joystick.GetCapabilities"/>
-        /// to query the number of available axes.
-        /// </returns>
-        /// <param name="axis">The axis to query.</param>
-        public float GetAxis(int axis)
+        public int Id { get; }
+
+        /// <summary>
+        /// Gets the name of the joystick this state describes.
+        /// </summary>
+        public string Name { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JoystickState"/> struct.
+        /// </summary>
+        /// <param name="hatCount">The amount of hats.</param>
+        /// <param name="axesCount">The amount of axes.</param>
+        /// <param name="buttonCount">The amount of buttons.</param>
+        /// <param name="id">The id of the joystick.</param>
+        /// <param name="name">The name of the joystick.</param>
+        public JoystickState(int hatCount, int axesCount, int buttonCount, int id, string name)
         {
-            return GetAxisRaw(axis) * ConversionFactor;
+            _hats = new Hat[hatCount];
+            _axes = new float[axesCount];
+            _buttons = new byte[buttonCount / 8];
+            Id = id;
+            Name = name;
         }
 
         /// <summary>
-        /// Gets the current <see cref="ButtonState"/> of the specified button.
+        /// Initializes a new instance of the <see cref="JoystickState"/> struct.
         /// </summary>
-        /// <returns><see cref="ButtonState.Pressed"/> if the specified button is pressed; otherwise, <see cref="ButtonState.Released"/>.</returns>
-        /// <param name="button">The button to query.</param>
-        public ButtonState GetButton(int button)
+        /// <param name="hats">The hats belonging to the joystick.</param>
+        /// <param name="axes">The axes belonging to the joystick.</param>
+        /// <param name="buttons">The buttons belonging to the joystick.</param>
+        /// <param name="id">The id of the joystick.</param>
+        /// <param name="name">The name of the joystick.</param>
+        public JoystickState(Hat[] hats, float[] axes, bool[] buttons, int id, string name)
         {
-            return (buttons & ((long)1 << button)) != 0 ? ButtonState.Pressed : ButtonState.Released;
-        }
+            _hats = hats;
+            _axes = axes;
+            Id = id;
+            Name = name;
 
-        /// <summary>
-        /// Gets the hat.
-        /// </summary>
-        /// <returns>The hat.</returns>
-        /// <param name="hat">Hat.</param>
-        public JoystickHatState GetHat(JoystickHat hat)
-        {
-            switch (hat)
+            _buttons = new byte[buttons.Length / 8];
+            for (int i = 0; i < buttons.Length; i++)
             {
-                case JoystickHat.Hat0:
-                    return hat0;
-                case JoystickHat.Hat1:
-                    return hat1;
-                case JoystickHat.Hat2:
-                    return hat2;
-                case JoystickHat.Hat3:
-                    return hat3;
-                default:
-                    return new JoystickHatState();
+                SetButtonDown(i, buttons[i]);
             }
         }
 
         /// <summary>
-        /// Gets a value indicating whether the specified button is currently pressed.
+        /// Gets a <see cref="Hat"/> describing the state of a hat.
         /// </summary>
-        /// <returns>true if the specified button is pressed; otherwise, false.</returns>
-        /// <param name="button">The button to query.</param>
-        public bool IsButtonDown(int button)
+        /// <param name="index">The index of the hat to check.</param>
+        /// <returns>A <see cref="Hat"/> describing the hat state.</returns>
+        public Hat GetHat(int index)
         {
-            return (buttons & ((long)1 << button)) != 0;
+            return _hats[index];
         }
 
         /// <summary>
-        /// Gets a value indicating whether the specified button is currently released.
+        /// Sets the state of a hat depending on the given value.
         /// </summary>
-        /// <returns>true if the specified button is released; otherwise, false.</returns>
-        /// <param name="button">The button to query.</param>
-        public bool IsButtonUp(int button)
+        /// <param name="index">The hat which position should be changed.</param>
+        /// <param name="value">The new state the hat should be changed to.</param>
+        internal void SetHat(int index, Hat value)
         {
-            return (buttons & ((long)1 << button)) == 0;
+            _hats[index] = value;
         }
 
         /// <summary>
-        /// Gets a value indicating whether any button is down.
+        /// Gets a <see cref="bool"/> describing the state of a button.
         /// </summary>
-        /// <value><c>true</c> if any button is down; otherwise, <c>false</c>.</value>
-        public bool IsAnyButtonDown
+        /// <param name="index">The index of the button to check.</param>
+        /// <returns><c>true</c> if the button is down; <c>false</c> otherwise.</returns>
+        public bool IsButtonDown(int index)
         {
-            get
-            {
-                // If any bit is set then a button is down.
-                return buttons != 0;
-            }
+            byte b = _buttons[index / 8];
+            int pow = (int)Math.Pow(2, index % 8);
+
+            return (b & pow) == pow;
         }
 
         /// <summary>
-        /// Gets a value indicating whether this instance is connected.
+        /// Sets the state of a button depending on the given value.
         /// </summary>
-        /// <value><c>true</c> if this instance is connected; otherwise, <c>false</c>.</value>
-        public bool IsConnected { get; private set; }
-
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents the current <see cref="OpenTK.Input.JoystickState"/>.
-        /// </summary>
-        /// <returns>A <see cref="System.String"/> that represents the current <see cref="OpenTK.Input.JoystickState"/>.</returns>
-        public override string ToString()
+        /// <param name="index">The index of the button which should be changed.</param>
+        /// <param name="value"><c>true</c> if the button is down; <c>false</c> otherwise.</param>
+        private void SetButtonDown(int index, bool value)
         {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < MaxAxes; i++)
-            {
-                sb.Append(" ");
-                sb.Append(String.Format("{0:f4}", GetAxis(i)));
-            }
-            return String.Format(
-                "{{Axes:{0}; Buttons: {1}; Hat: {2}; IsConnected: {3}}}",
-                sb.ToString(),
-                Convert.ToString(buttons, 2).PadLeft(16, '0'),
-                hat0,
-                IsConnected);
-        }
-
-        /// <summary>
-        /// Serves as a hash function for a <see cref="OpenTK.Input.JoystickState"/> object.
-        /// </summary>
-        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
-        /// hash table.</returns>
-        public override int GetHashCode()
-        {
-            int hash = buttons.GetHashCode() ^ IsConnected.GetHashCode();
-            for (int i = 0; i < MaxAxes; i++)
-            {
-                hash ^= GetAxisUnsafe(i).GetHashCode();
-            }
-            return hash;
-        }
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="OpenTK.Input.JoystickState"/>.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object"/> to compare with the current <see cref="OpenTK.Input.JoystickState"/>.</param>
-        /// <returns><c>true</c> if the specified <see cref="System.Object"/> is equal to the current
-        /// <see cref="OpenTK.Input.JoystickState"/>; otherwise, <c>false</c>.</returns>
-        public override bool Equals(object obj)
-        {
-            return
-                obj is JoystickState &&
-                Equals((JoystickState)obj);
-        }
-
-        internal int PacketNumber { get; private set; }
-
-        internal short GetAxisRaw(int axis)
-        {
-            short value = 0;
-            if (axis >= 0 && axis < MaxAxes)
-            {
-                value = GetAxisUnsafe(axis);
-            }
-            else
-            {
-                Debug.Print("[Joystick] Invalid axis {0}", axis);
-            }
-            return value;
-        }
-
-        internal void SetAxis(int axis, short value)
-        {
-            int index = axis;
-            if (index < 0 || index >= MaxAxes)
-            {
-                throw new ArgumentOutOfRangeException("axis");
-            }
-
-            unsafe
-            {
-                fixed (short* paxes = axes)
-                {
-                    *(paxes + index) = value;
-                }
-            }
-        }
-
-        internal void ClearButtons()
-        {
-            buttons = 0;
-        }
-
-        internal void SetButton(int button, bool value)
-        {
-            if (button < 0 || button >= MaxButtons)
-            {
-                throw new ArgumentOutOfRangeException("button");
-            }
+            int byteOffSet = index / 8;
+            int bitOffset = index % 8;
 
             if (value)
             {
-                buttons |= (long)1 << button;
+                _buttons[byteOffSet] |= (byte)(1 << bitOffset);
             }
             else
             {
-                buttons &= ~((long)1 << button);
-            }
-        }
-
-        internal void SetHat(JoystickHat hat, JoystickHatState value)
-        {
-            switch (hat)
-            {
-                case JoystickHat.Hat0:
-                    hat0 = value;
-                    break;
-                case JoystickHat.Hat1:
-                    hat1 = value;
-                    break;
-                case JoystickHat.Hat2:
-                    hat2 = value;
-                    break;
-                case JoystickHat.Hat3:
-                    hat3 = value;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("hat");
-            }
-        }
-
-        internal void SetIsConnected(bool value)
-        {
-            IsConnected = value;
-        }
-
-        internal void SetPacketNumber(int number)
-        {
-            PacketNumber = number;
-        }
-
-        private short GetAxisUnsafe(int index)
-        {
-            unsafe
-            {
-                fixed (short* paxis = axes)
-                {
-                    return *(paxis + index);
-                }
+                _buttons[byteOffSet] &= (byte)~(1 << bitOffset);
             }
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="OpenTK.Input.JoystickState"/> is equal to the current <see cref="OpenTK.Input.JoystickState"/>.
+        /// Gets a <see cref="float"/> between -1 and 1 describing the position of an axis.
         /// </summary>
-        /// <param name="other">The <see cref="OpenTK.Input.JoystickState"/> to compare with the current <see cref="OpenTK.Input.JoystickState"/>.</param>
-        /// <returns><c>true</c> if the specified <see cref="OpenTK.Input.JoystickState"/> is equal to the current
-        /// <see cref="OpenTK.Input.JoystickState"/>; otherwise, <c>false</c>.</returns>
+        /// <param name="index">The index of the Axis to check.</param>
+        /// <returns>A <see cref="float"/> between -1 and 1 describing the position of the axis.</returns>
+        public float GetAxis(int index)
+        {
+            return _axes[index];
+        }
+
+        /// <summary>
+        /// Sets the state of an axis depending on the given value.
+        /// </summary>
+        /// <param name="index">The index of the axis which position should be changed.</param>
+        /// <param name="value">The new state the key should be changed to.</param>
+        private void SetAxis(int index, float value)
+        {
+            _axes[index] = value < -1 ? -1 : (value > 1 ? 1 : value);
+        }
+
+        /// <summary>
+        /// Checks wether two <see cref="JoystickState"/> instances are equal.
+        /// </summary>
+        /// <param name="left">The first <see cref="JoystickState"/> instance to compare.</param>
+        /// <param name="right">The second <see cref="JoystickState"/> instance to compare.</param>
+        /// <returns><c>true</c> if both left is equal to right; <c>false</c>otherwise.</returns>
+        public static bool operator ==(JoystickState left, JoystickState right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Checks wether two <see cref="JoystickState"/> instances are not equal.
+        /// </summary>
+        /// <param name="left">The first <see cref="JoystickState"/> instance to compare.</param>
+        /// <param name="right">The second <see cref="JoystickState"/> instance to compare.</param>
+        /// <returns><c>true</c> if both left is not equal to right; <c>false</c> otherwise.</returns>
+        public static bool operator !=(JoystickState left, JoystickState right)
+        {
+            return !left.Equals(right);
+        }
+
+        /// <summary>
+        /// Compares to an object instance for equality.
+        /// </summary>
+        /// <param name="obj">The <see cref="object"/> to compare to.</param>
+        /// <returns><c>true</c> if this instance is equal to obj; <c>false</c> otherwise.</returns>
+        public override bool Equals(object obj)
+        {
+            if (obj is JoystickState state)
+            {
+                return Equals(state);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Compares to <see cref="JoystickState"/> instances.
+        /// </summary>
+        /// <param name="other">The instance to compare to.</param>
+        /// <returns><c>true</c> if both instances are equal; <c>false</c> otherwise.</returns>
         public bool Equals(JoystickState other)
         {
-            bool equals =
-                buttons == other.buttons &&
-                IsConnected == other.IsConnected;
-            for (int i = 0; equals && i < MaxAxes; i++)
+            return _axes == other._axes && _hats == other._hats && _buttons == other._buttons && Id == other.Id && Name == other.Name;
+        }
+
+        /// <summary>
+        /// Generates a hashcode for the current instance.
+        /// </summary>
+        /// <returns>A <see cref="int"/> representing the hashcode for this instance.</returns>
+        public override int GetHashCode()
+        {
+            int hashCode = _axes.GetHashCode();
+            hashCode ^= _hats.GetHashCode();
+            hashCode ^= _buttons.GetHashCode();
+            hashCode ^= Id.GetHashCode();
+            hashCode ^= Name.GetHashCode();
+
+            return hashCode;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+
+            builder.Append("{hats: [");
+            builder.Append(_hats[0]);
+            for (int i = 1; i < _hats.Length; i++)
             {
-                equals &= GetAxisUnsafe(i) == other.GetAxisUnsafe(i);
+                builder.Append(", ");
+                builder.Append(_hats[i]);
             }
-            for (int i = 0; equals && i < MaxHats; i++)
+
+            builder.Append("], axes: [");
+            builder.Append(_axes[0]);
+            for (int i = 1; i < _axes.Length; i++)
             {
-                JoystickHat hat = JoystickHat.Hat0 + i;
-                equals &= GetHat(hat).Equals(other.GetHat(hat));
+                builder.Append(", ");
+                builder.Append(_axes[i]);
             }
-            return equals;
+
+            builder.Append("], buttons: [");
+            builder.Append(IsButtonDown(0) ? "down" : "up");
+            for (int i = 0; i < _buttons.Length * 8; i++)
+            {
+                builder.Append(", ");
+                builder.Append(IsButtonDown(0) ? "down" : "up");
+            }
+
+            builder.Append("], id: ");
+            builder.Append(Id);
+            builder.Append(", name: ");
+            builder.Append(Name);
+            builder.Append("}");
+
+            return builder.ToString();
         }
     }
 }
