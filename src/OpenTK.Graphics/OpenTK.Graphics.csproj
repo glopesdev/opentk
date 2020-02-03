@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ES31\**" />
+    <EmbeddedResource Remove="ES31\**" />
+    <None Remove="ES31\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\OpenTK\OpenTK.csproj" />
   </ItemGroup>
 
