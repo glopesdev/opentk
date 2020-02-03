@@ -1,7 +1,28 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net472;netstandard2.1</TargetFrameworks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Platform\Android\**" />
+    <Compile Remove="Platform\iPhoneOS\**" />
+    <EmbeddedResource Remove="Platform\Android\**" />
+    <EmbeddedResource Remove="Platform\iPhoneOS\**" />
+    <None Remove="Platform\Android\**" />
+    <None Remove="Platform\iPhoneOS\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Win32.Registry" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Win32.SystemEvents" Version="4.7.0" />
+    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTK\OpenTK.csproj" />
+    <ProjectReference Include="..\OpenTK.Graphics\OpenTK.Graphics.csproj" />
+  </ItemGroup>
 
 </Project>

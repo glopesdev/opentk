@@ -304,7 +304,7 @@ namespace OpenTK.Platform.X11
             return Arb.GetProcAddress(funcname);
         }
 
-        internal override void LoadEntryPoints()
+        public override void LoadEntryPoints()
         {
             unsafe
             {

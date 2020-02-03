@@ -83,7 +83,7 @@ namespace OpenTK.Platform.SDL2
 
                 Mode = GetGLAttributes(SdlContext, out flags);
             }
-            Handle = GraphicsContext.GetCurrentContext();
+            Handle = GraphicsContext.CurrentContextHandle;
             Debug.Print("SDL2 created GraphicsContext (handle: {0})", Handle);
             Debug.Print("    GraphicsMode: {0}", Mode);
             Debug.Print("    GraphicsContextFlags: {0}", flags);
@@ -340,7 +340,7 @@ namespace OpenTK.Platform.SDL2
         {
             get
             {
-                return GraphicsContext.GetCurrentContext() == Context;
+                return GraphicsContext.CurrentContextHandle == Context;
             }
         }
 

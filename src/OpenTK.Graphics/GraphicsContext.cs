@@ -65,8 +65,6 @@ namespace OpenTK.Graphics
         private readonly static Dictionary<ContextHandle, IGraphicsContext> available_contexts =
             new Dictionary<ContextHandle, IGraphicsContext>();
 
-//TODO: Creating GraphicsContext not supported at the moment
-#if FALSE
         /// <summary>
         /// Constructs a new GraphicsContext with the specified GraphicsMode and attaches it to the specified window.
         /// </summary>
@@ -154,6 +152,10 @@ namespace OpenTK.Graphics
                     Debug.Print("GraphicsContextFlags: {0}", flags);
                     Debug.Print("Requested version: {0}.{1}", major, minor);
 
+//TODO: Need to abstract IPlatformFactory away from all the windowing dependencies
+#if TRUE
+                    implementation = new Platform.Dummy.DummyGLContext();
+#else
                     // Todo: Add a DummyFactory implementing IPlatformFactory.
                     if (designMode)
                     {
@@ -187,6 +189,7 @@ namespace OpenTK.Graphics
                         handle_cached = ((IGraphicsContextInternal)implementation).Context;
                         factory.RegisterResource(this);
                     }
+#endif
 
                     AddContext(this);
                 }
@@ -257,6 +260,8 @@ namespace OpenTK.Graphics
             implementation.LoadAll();
         }
 
+//TODO: Creation of external graphics context is not supported at the moment.
+#if FALSE
         /// <summary>
         /// Constructs a new GraphicsContext from a pre-existing context created outside of OpenTK. A dummy context will be created if both
         /// the handle and the window are null.
