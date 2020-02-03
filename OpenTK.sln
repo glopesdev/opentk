@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator.Bind", "src\Generator.Bind\Generator.Bind.csproj", "{31D19132-0000-0000-0000-000000000000}"
 EndProject
@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator.Convert", "src\Ge
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator.Rewrite", "src\Generator.Rewrite\Generator.Rewrite.csproj", "{C426C9D1-8857-4E52-BAC7-4C05EE6070AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTK", "src\OpenTK\OpenTK.csproj", "{A37A7E14-0000-0000-0000-000000000000}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTK", "src\OpenTK\OpenTK.csproj", "{A37A7E14-0000-0000-0000-000000000000}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTK.Android", "src\OpenTK\OpenTK.Android.csproj", "{1648ACE1-E7D0-41CB-9A0E-C2A9D76C13A9}"
 EndProject
@@ -29,10 +29,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{F1A570
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{5EEEC96B-BD2F-45B0-935D-19E9E6D7D969}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		build.fsx = build.fsx
 		README.md = README.md
 		RELEASE_NOTES.md = RELEASE_NOTES.md
-		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "OpenTK.Tests", "tests\OpenTK.Tests\OpenTK.Tests.fsproj", "{6801C263-ADDA-4A7B-979D-649BCB5A1DF7}"
@@ -42,6 +42,23 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTK.Tests.Math", "tests\OpenTK.Tests.Math\OpenTK.Tests.Math.csproj", "{C2B07CD9-B388-4FC3-AF31-C648F7EA904E}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "OpenTK.Tests.Generators", "tests\OpenTK.Tests.Generators\OpenTK.Tests.Generators.fsproj", "{2B11AAEB-D8AC-4356-938F-532D720E0C30}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTK.Audio", "src\OpenTK.Audio\OpenTK.Audio.csproj", "{D200B1DE-01CC-4095-ACEC-82F0F8E6F96B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTK.Graphics", "src\OpenTK.Graphics\OpenTK.Graphics.csproj", "{1E01390E-B8BC-4B30-8ECB-BC11E937F445}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTK.Window.Desktop", "src\OpenTK.Window\OpenTK.Window.Desktop.csproj", "{26FFD017-EC2A-4976-A09A-32F14B8C7FD7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "props", "props", "{F9D8840A-418E-477D-A7FE-AB92EDCA4D80}"
+	ProjectSection(SolutionItems) = preProject
+		props\common.props = props\common.props
+		props\jetbrains.props = props\jetbrains.props
+		props\netfx-mono.props = props\netfx-mono.props
+		props\nuget-common.props = props\nuget-common.props
+		props\stylecop.props = props\stylecop.props
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTK.Compute", "src\OpenTK.Compute\OpenTK.Compute.csproj", "{82857E20-1DC6-4A20-8133-6BF00C52FB33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,6 +114,22 @@ Global
 		{2B11AAEB-D8AC-4356-938F-532D720E0C30}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B11AAEB-D8AC-4356-938F-532D720E0C30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B11AAEB-D8AC-4356-938F-532D720E0C30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D200B1DE-01CC-4095-ACEC-82F0F8E6F96B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D200B1DE-01CC-4095-ACEC-82F0F8E6F96B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D200B1DE-01CC-4095-ACEC-82F0F8E6F96B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D200B1DE-01CC-4095-ACEC-82F0F8E6F96B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E01390E-B8BC-4B30-8ECB-BC11E937F445}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E01390E-B8BC-4B30-8ECB-BC11E937F445}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E01390E-B8BC-4B30-8ECB-BC11E937F445}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E01390E-B8BC-4B30-8ECB-BC11E937F445}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26FFD017-EC2A-4976-A09A-32F14B8C7FD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26FFD017-EC2A-4976-A09A-32F14B8C7FD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26FFD017-EC2A-4976-A09A-32F14B8C7FD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26FFD017-EC2A-4976-A09A-32F14B8C7FD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82857E20-1DC6-4A20-8133-6BF00C52FB33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82857E20-1DC6-4A20-8133-6BF00C52FB33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82857E20-1DC6-4A20-8133-6BF00C52FB33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82857E20-1DC6-4A20-8133-6BF00C52FB33}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,5 +139,8 @@ Global
 		{522D9279-3ED6-475F-867A-6AE69A53C24A} = {1857BB8E-1A35-4EBF-9F6D-685F11DC025B}
 		{C2B07CD9-B388-4FC3-AF31-C648F7EA904E} = {1857BB8E-1A35-4EBF-9F6D-685F11DC025B}
 		{2B11AAEB-D8AC-4356-938F-532D720E0C30} = {1857BB8E-1A35-4EBF-9F6D-685F11DC025B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8803EFE3-3488-4794-B539-4197B190E757}
 	EndGlobalSection
 EndGlobal
