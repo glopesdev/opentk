@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator.Bind", "src\Generator.Bind\Generator.Bind.csproj", "{31D19132-0000-0000-0000-000000000000}"
 EndProject
@@ -29,10 +29,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{F1A570
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{5EEEC96B-BD2F-45B0-935D-19E9E6D7D969}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		build.fsx = build.fsx
 		README.md = README.md
 		RELEASE_NOTES.md = RELEASE_NOTES.md
-		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "OpenTK.Tests", "tests\OpenTK.Tests\OpenTK.Tests.fsproj", "{6801C263-ADDA-4A7B-979D-649BCB5A1DF7}"
@@ -42,6 +42,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTK.Tests.Math", "tests\OpenTK.Tests.Math\OpenTK.Tests.Math.csproj", "{C2B07CD9-B388-4FC3-AF31-C648F7EA904E}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "OpenTK.Tests.Generators", "tests\OpenTK.Tests.Generators\OpenTK.Tests.Generators.fsproj", "{2B11AAEB-D8AC-4356-938F-532D720E0C30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTK.Audio", "src\OpenTK.Audio\OpenTK.Audio.csproj", "{4FE4AF82-C3CE-4AB8-B6AC-F10FA78D2E60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTK.Graphics", "src\OpenTK.Graphics\OpenTK.Graphics.csproj", "{A38DAD97-940F-4D3F-B24E-6CFAB462BC10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTK.GLWindow", "src\OpenTK.GLWindow\OpenTK.GLWindow.csproj", "{3EB98300-7F9F-48BC-922E-AC9FE012BC47}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTK.Compute", "src\OpenTK.Compute\OpenTK.Compute.csproj", "{DCB46D1E-CD5A-4758-9FC4-2B71AA2DE6D3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,6 +105,22 @@ Global
 		{2B11AAEB-D8AC-4356-938F-532D720E0C30}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B11AAEB-D8AC-4356-938F-532D720E0C30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B11AAEB-D8AC-4356-938F-532D720E0C30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FE4AF82-C3CE-4AB8-B6AC-F10FA78D2E60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FE4AF82-C3CE-4AB8-B6AC-F10FA78D2E60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FE4AF82-C3CE-4AB8-B6AC-F10FA78D2E60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FE4AF82-C3CE-4AB8-B6AC-F10FA78D2E60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A38DAD97-940F-4D3F-B24E-6CFAB462BC10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A38DAD97-940F-4D3F-B24E-6CFAB462BC10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A38DAD97-940F-4D3F-B24E-6CFAB462BC10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A38DAD97-940F-4D3F-B24E-6CFAB462BC10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EB98300-7F9F-48BC-922E-AC9FE012BC47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EB98300-7F9F-48BC-922E-AC9FE012BC47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EB98300-7F9F-48BC-922E-AC9FE012BC47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EB98300-7F9F-48BC-922E-AC9FE012BC47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCB46D1E-CD5A-4758-9FC4-2B71AA2DE6D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCB46D1E-CD5A-4758-9FC4-2B71AA2DE6D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCB46D1E-CD5A-4758-9FC4-2B71AA2DE6D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCB46D1E-CD5A-4758-9FC4-2B71AA2DE6D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,5 +130,8 @@ Global
 		{522D9279-3ED6-475F-867A-6AE69A53C24A} = {1857BB8E-1A35-4EBF-9F6D-685F11DC025B}
 		{C2B07CD9-B388-4FC3-AF31-C648F7EA904E} = {1857BB8E-1A35-4EBF-9F6D-685F11DC025B}
 		{2B11AAEB-D8AC-4356-938F-532D720E0C30} = {1857BB8E-1A35-4EBF-9F6D-685F11DC025B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {50860A24-04DF-4DD0-BA39-942610042061}
 	EndGlobalSection
 EndGlobal
