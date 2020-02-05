@@ -84,11 +84,6 @@ namespace OpenTK.Graphics
         IGraphicsContext Implementation { get; }
 
         /// <summary>
-        /// Loads all OpenGL entry points. Requires this instance to be current on the calling thread.
-        /// </summary>
-        void LoadAll();
-
-        /// <summary>
         /// Gets a handle to the OpenGL rendering context.
         /// </summary>
         ContextHandle Context { get; }

@@ -192,7 +192,7 @@ namespace OpenTK
                 this.isSingleThreaded = isSingleThreaded;
                 glContext = new GraphicsContext(mode == null ? GraphicsMode.Default : mode, WindowInfo, major, minor, flags);
                 glContext.MakeCurrent(WindowInfo);
-                (glContext as IGraphicsContextInternal).LoadAll();
+                glContext.LoadAll();
 
                 VSync = VSyncMode.On;
 
