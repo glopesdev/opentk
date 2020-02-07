@@ -54,7 +54,7 @@ namespace OpenTK.Graphics
         /// </remarks>
         protected override IntPtr GetAddress(string funcname)
         {
-            var context = GraphicsContext.CurrentContext as IGraphicsContextInternal;
+            var context = GraphicsContext.CurrentContext as IBindingsContext;
             if (context == null)
             {
                 throw new GraphicsContextMissingException();
@@ -76,14 +76,14 @@ namespace OpenTK.Graphics
                 throw new GraphicsContextMissingException();
             }
 
-            IGraphicsContextInternal context_internal = context as IGraphicsContextInternal;
+            IBindingsContext bindingsContext = context as IBindingsContext;
             unsafe
             {
                 fixed (byte* name = _EntryPointNamesInstance)
                 {
                     for (int i = 0; i < _EntryPointsInstance.Length; i++)
                     {
-                        _EntryPointsInstance[i] = context_internal.GetAddress(
+                        _EntryPointsInstance[i] = bindingsContext.GetAddress(
                             new IntPtr(name + _EntryPointNameOffsetsInstance[i]));
                     }
                 }

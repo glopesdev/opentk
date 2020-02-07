@@ -32,7 +32,7 @@ using OpenTK.Platform;
 namespace OpenTK.Graphics
 {
     // Provides the foundation for all IGraphicsContext implementations.
-    public abstract class GraphicsContextBase : IGraphicsContext, IGraphicsContextInternal, IEquatable<IGraphicsContextInternal>
+    public abstract class GraphicsContextBase : IGraphicsContext, IBindingsContext, IEquatable<IBindingsContext>
     {
         protected ContextHandle Handle;
         protected GraphicsMode Mode;
@@ -106,7 +106,7 @@ namespace OpenTK.Graphics
         }
         #endif
 
-        public bool Equals(IGraphicsContextInternal other)
+        public bool Equals(IBindingsContext other)
         {
             return Context.Equals(other.Context);
         }
@@ -125,8 +125,8 @@ namespace OpenTK.Graphics
         public override bool Equals(object obj)
         {
             return
-                obj is IGraphicsContextInternal &&
-                Equals((IGraphicsContextInternal)obj);
+                obj is IBindingsContext &&
+                Equals((IBindingsContext)obj);
         }
     }
 }

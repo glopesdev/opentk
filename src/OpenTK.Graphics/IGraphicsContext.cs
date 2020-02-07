@@ -76,7 +76,7 @@ namespace OpenTK.Graphics
     /// <summary>
     /// Provides methods to create new GraphicsContexts. Should only be used for extending OpenTK.
     /// </summary>
-    public interface IGraphicsContextInternal
+    public interface IBindingsContext
     {
         /// <summary>
         /// Gets the internal implementation of the current instance.

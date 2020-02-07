@@ -260,7 +260,7 @@ namespace OpenTK.Platform.Egl
                 return null;
             }
 
-            var internalContext = sharedContext as IGraphicsContextInternal;
+            var internalContext = sharedContext as IBindingsContext;
             if (internalContext != null)
             {
                 return (EglContext)internalContext.Implementation;

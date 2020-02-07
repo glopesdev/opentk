@@ -190,7 +190,7 @@ namespace OpenTK
             try
             {
                 this.isSingleThreaded = isSingleThreaded;
-                glContext = new GraphicsContext(mode == null ? GraphicsMode.Default : mode, WindowInfo, major, minor, flags);
+                glContext = PlatformContext.Create(mode == null ? GraphicsMode.Default : mode, WindowInfo, major, minor, flags);
                 glContext.MakeCurrent(WindowInfo);
                 glContext.LoadAll();
 

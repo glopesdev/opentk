@@ -94,7 +94,7 @@ namespace OpenTK.Platform.X11
             }
 
             ContextHandle shareHandle = shared != null ?
-                (shared as IGraphicsContextInternal).Context : (ContextHandle)IntPtr.Zero;
+                (shared as IBindingsContext).Context : (ContextHandle)IntPtr.Zero;
 
             Debug.Write("Creating X11GLContext context: ");
             Debug.Write(direct ? "direct, " : "indirect, ");

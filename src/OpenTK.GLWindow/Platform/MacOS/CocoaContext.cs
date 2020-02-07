@@ -73,7 +73,7 @@ namespace OpenTK
 
             if (shareContext is GraphicsContext)
             {
-                ContextHandle shareHandle = shareContext != null ? (shareContext as IGraphicsContextInternal).Context : (ContextHandle)IntPtr.Zero;
+                ContextHandle shareHandle = shareContext != null ? (shareContext as IBindingsContext).Context : (ContextHandle)IntPtr.Zero;
                 shareContextRef = shareHandle.Handle;
             }
 

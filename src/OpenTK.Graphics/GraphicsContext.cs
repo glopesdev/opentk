@@ -34,7 +34,7 @@ namespace OpenTK.Graphics
     /// <summary>
     /// Represents and provides methods to manipulate an OpenGL render context.
     /// </summary>
-    public sealed class GraphicsContext : IGraphicsContext, IGraphicsContextInternal
+    public sealed class GraphicsContext : IGraphicsContext, IBindingsContext
     {
         /// <summary>
         /// Used to retrive function pointers by name.
@@ -65,138 +65,17 @@ namespace OpenTK.Graphics
         private readonly static Dictionary<ContextHandle, IGraphicsContext> available_contexts =
             new Dictionary<ContextHandle, IGraphicsContext>();
 
-        /// <summary>
-        /// Constructs a new GraphicsContext with the specified GraphicsMode and attaches it to the specified window.
-        /// </summary>
-        /// <param name="mode">The OpenTK.Graphics.GraphicsMode of the GraphicsContext.</param>
-        /// <param name="window">The OpenTK.Platform.IWindowInfo to attach the GraphicsContext to.</param>
-        public GraphicsContext(GraphicsMode mode, IWindowInfo window)
-            : this(mode, window, 1, 0, GraphicsContextFlags.Default)
-        { }
-
-        /// <summary>
-        /// Constructs a new GraphicsContext with the specified GraphicsMode, version and flags,  and attaches it to the specified window.
-        /// </summary>
-        /// <param name="mode">The OpenTK.Graphics.GraphicsMode of the GraphicsContext.</param>
-        /// <param name="window">The OpenTK.Platform.IWindowInfo to attach the GraphicsContext to.</param>
-        /// <param name="major">The major version of the new GraphicsContext.</param>
-        /// <param name="minor">The minor version of the new GraphicsContext.</param>
-        /// <param name="flags">The GraphicsContextFlags for the GraphicsContext.</param>
-        /// <remarks>
-        /// Different hardware supports different flags, major and minor versions. Invalid parameters will be silently ignored.
-        /// </remarks>
-        public GraphicsContext(GraphicsMode mode, IWindowInfo window, int major, int minor, GraphicsContextFlags flags)
-            : this(mode, window, FindSharedContext(), major, minor, flags)
+        public GraphicsContext(IGraphicsContext context, IBindingsContext bindingContext, GetCurrentContextDelegate getCurrentContext)
         {
-        }
-
-        /// <summary>
-        /// Constructs a new GraphicsContext with the specified GraphicsMode, version and flags, and attaches it to the specified window. A dummy context will be created if both
-        /// the handle and the window are null.
-        /// </summary>
-        /// <param name="mode">The OpenTK.Graphics.GraphicsMode of the GraphicsContext.</param>
-        /// <param name="window">The OpenTK.Platform.IWindowInfo to attach the GraphicsContext to.</param>
-        /// <param name="shareContext">The GraphicsContext to share resources with, or null for explicit non-sharing.</param>
-        /// <param name="major">The major version of the new GraphicsContext.</param>
-        /// <param name="minor">The minor version of the new GraphicsContext.</param>
-        /// <param name="flags">The GraphicsContextFlags for the GraphicsContext.</param>
-        /// <remarks>
-        /// Different hardware supports different flags, major and minor versions. Invalid parameters will be silently ignored.
-        /// </remarks>
-        public GraphicsContext(GraphicsMode mode, IWindowInfo window, IGraphicsContext shareContext, int major, int minor, GraphicsContextFlags flags)
-        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (bindingContext == null) throw new ArgumentNullException(nameof(bindingContext));
+            if (getCurrentContext == null) throw new ArgumentNullException(nameof(getCurrentContext));
+            implementation = context;
+            handle_cached = bindingContext.Context;
             lock (SyncRoot)
             {
-                bool designMode = false;
-                if (mode == null && window == null)
-                {
-                    designMode = true;
-                }
-                else if (mode == null)
-                {
-                    throw new ArgumentNullException("mode", "Must be a valid GraphicsMode.");
-                }
-                else if (window == null)
-                {
-                    throw new ArgumentNullException("window", "Must point to a valid window.");
-                }
-
-                // Silently ignore invalid major and minor versions.
-                if (major <= 0)
-                {
-                    major = 1;
-                }
-                if (minor < 0)
-                {
-                    minor = 0;
-                }
-
-                // Angle needs an embedded context
-                const GraphicsContextFlags useAngleFlag = GraphicsContextFlags.Angle
-                                                          | GraphicsContextFlags.AngleD3D9
-                                                          | GraphicsContextFlags.AngleD3D11
-                                                          | GraphicsContextFlags.AngleOpenGL;
-                var useAngle = false;
-                if ((flags & useAngleFlag) != 0)
-                {
-                    flags |= GraphicsContextFlags.Embedded;
-                    useAngle = true;
-                }
-
-                Debug.Print("Creating GraphicsContext.");
-                try
-                {
-                    Debug.Indent();
-                    Debug.Print("GraphicsMode: {0}", mode);
-                    Debug.Print("IWindowInfo: {0}", window);
-                    Debug.Print("GraphicsContextFlags: {0}", flags);
-                    Debug.Print("Requested version: {0}.{1}", major, minor);
-
-//TODO: Need to abstract IPlatformFactory away from all the windowing dependencies
-#if TRUE
-                    implementation = new Platform.Dummy.DummyGLContext();
-#else
-                    // Todo: Add a DummyFactory implementing IPlatformFactory.
-                    if (designMode)
-                    {
-                        implementation = new Platform.Dummy.DummyGLContext();
-                    }
-                    else
-                    {
-                        IPlatformFactory factory = null;
-                        switch ((flags & GraphicsContextFlags.Embedded) == GraphicsContextFlags.Embedded)
-                        {
-                            case false:
-                                factory = Factory.Default;
-                                break;
-                            case true:
-                                factory = useAngle ? Factory.Angle : Factory.Embedded;
-                                break;
-                        }
-
-                        // Note: this approach does not allow us to mix native and EGL contexts in the same process.
-                        // This should not be a problem, as this use-case is not interesting for regular applications.
-                        // Note 2: some platforms may not support a direct way of getting the current context
-                        // (this happens e.g. with DummyGLContext). In that case, we use a slow fallback which
-                        // iterates through all known contexts and checks if any is current (check GetCurrentContext
-                        // declaration).
-                        if (GetCurrentContext == null)
-                        {
-                            GetCurrentContext = factory.CreateGetCurrentGraphicsContext();
-                        }
-
-                        implementation = factory.CreateGLContext(mode, window, shareContext, DirectRendering, major, minor, flags);
-                        handle_cached = ((IGraphicsContextInternal)implementation).Context;
-                        factory.RegisterResource(this);
-                    }
-#endif
-
-                    AddContext(this);
-                }
-                finally
-                {
-                    Debug.Unindent();
-                }
+                GetCurrentContext = getCurrentContext;
+                AddContext(this);
             }
         }
 
@@ -292,7 +171,7 @@ namespace OpenTK.Graphics
         /// <returns>A <see cref="System.String"/>  that contains a string representation of this instance.</returns>
         public override string ToString()
         {
-            return (this as IGraphicsContextInternal).Context.ToString();
+            return (this as IBindingsContext).Context.ToString();
         }
 
         /// <summary>
@@ -301,7 +180,7 @@ namespace OpenTK.Graphics
         /// <returns>A System.Int32 with the hash code of this instance.</returns>
         public override int GetHashCode()
         {
-            return (this as IGraphicsContextInternal).Context.GetHashCode();
+            return (this as IBindingsContext).Context.GetHashCode();
         }
 
         /// <summary>
@@ -312,10 +191,10 @@ namespace OpenTK.Graphics
         public override bool Equals(object obj)
         {
             return (obj is GraphicsContext) &&
-                (this as IGraphicsContextInternal).Context == (obj as IGraphicsContextInternal).Context;
+                (this as IBindingsContext).Context == (obj as IBindingsContext).Context;
         }
 
-        private static void AddContext(IGraphicsContextInternal context)
+        private static void AddContext(IBindingsContext context)
         {
             ContextHandle ctx = context.Context;
             if (!available_contexts.ContainsKey(ctx))
@@ -330,7 +209,7 @@ namespace OpenTK.Graphics
             }
         }
 
-        private static void RemoveContext(IGraphicsContextInternal context)
+        private static void RemoveContext(IBindingsContext context)
         {
             ContextHandle ctx = context.Context;
             if (available_contexts.ContainsKey(ctx))
@@ -520,7 +399,7 @@ namespace OpenTK.Graphics
         /// <summary>
         /// Gets the platform-specific implementation of this IGraphicsContext.
         /// </summary>
-        IGraphicsContext IGraphicsContextInternal.Implementation
+        IGraphicsContext IBindingsContext.Implementation
         {
             get { return implementation; }
         }
@@ -528,13 +407,13 @@ namespace OpenTK.Graphics
         /// <summary>
         /// Gets a handle to the OpenGL rendering context.
         /// </summary>
-        ContextHandle IGraphicsContextInternal.Context
+        ContextHandle IBindingsContext.Context
         {
             get
             {
                 if (implementation != null)
                 {
-                    handle_cached = ((IGraphicsContextInternal)implementation).Context;
+                    handle_cached = ((IBindingsContext)implementation).Context;
                 }
                 return handle_cached;
             }
@@ -557,10 +436,10 @@ namespace OpenTK.Graphics
         /// available in the current OpenGL context. The return value and calling convention
         /// depends on the underlying platform.
         /// </returns>
-        IntPtr IGraphicsContextInternal.GetAddress(string function)
+        IntPtr IBindingsContext.GetAddress(string function)
         {
             IntPtr name = System.Runtime.InteropServices.Marshal.StringToHGlobalAnsi(function);
-            IntPtr address = (implementation as IGraphicsContextInternal).GetAddress(name);
+            IntPtr address = (implementation as IBindingsContext).GetAddress(name);
             System.Runtime.InteropServices.Marshal.FreeHGlobal(name);
             return address;
         }
@@ -577,9 +456,9 @@ namespace OpenTK.Graphics
         /// available in the current OpenGL context. The return value and calling convention
         /// depends on the underlying platform.
         /// </returns>
-        IntPtr IGraphicsContextInternal.GetAddress(IntPtr function)
+        IntPtr IBindingsContext.GetAddress(IntPtr function)
         {
-            return (implementation as IGraphicsContextInternal).GetAddress(function);
+            return (implementation as IBindingsContext).GetAddress(function);
         }
 
         /// <summary>
@@ -605,7 +484,7 @@ namespace OpenTK.Graphics
                 // This is also known to crash GLX implementations.
                 if (manual)
                 {
-                    Debug.Print("Disposing context {0}.", (this as IGraphicsContextInternal).Context.ToString());
+                    Debug.Print("Disposing context {0}.", (this as IBindingsContext).Context.ToString());
                     if (implementation != null)
                     {
                         implementation.Dispose();

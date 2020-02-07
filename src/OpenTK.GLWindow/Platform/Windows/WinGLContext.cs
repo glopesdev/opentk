@@ -161,7 +161,7 @@ namespace OpenTK.Platform.Windows
                             Handle = new ContextHandle(
                                 Wgl.Arb.CreateContextAttribs(
                                     window.DeviceContext,
-                                    sharedContext != null ? (sharedContext as IGraphicsContextInternal).Context.Handle : IntPtr.Zero,
+                                    sharedContext != null ? (sharedContext as IBindingsContext).Context.Handle : IntPtr.Zero,
                                     attributes.ToArray()));
                             if (Handle == ContextHandle.Zero)
                             {
@@ -220,7 +220,7 @@ namespace OpenTK.Platform.Windows
             {
                 Marshal.GetLastWin32Error();
                 Debug.Write(String.Format("Sharing state with context {0}: ", sharedContext));
-                bool result = Wgl.ShareLists((sharedContext as IGraphicsContextInternal).Context.Handle, Handle.Handle);
+                bool result = Wgl.ShareLists((sharedContext as IBindingsContext).Context.Handle, Handle.Handle);
                 Debug.WriteLine(result ? "success!" : "failed with win32 error " + Marshal.GetLastWin32Error());
             }
         }
@@ -417,7 +417,7 @@ namespace OpenTK.Platform.Windows
         /// <returns>A System.String describing this OpenGL context.</returns>
         public override string ToString()
         {
-            return (this as IGraphicsContextInternal).Context.ToString();
+            return (this as IBindingsContext).Context.ToString();
         }
 
         protected override void Dispose(bool calledManually)
