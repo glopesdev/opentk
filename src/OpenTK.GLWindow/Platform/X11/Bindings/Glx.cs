@@ -257,21 +257,15 @@ namespace OpenTK.Platform.X11
         private const string Library = "libGL.so.1";
         private static readonly object sync_root = new object();
 
-        private static readonly byte[] EntryPointNames = new byte[]
+        private static readonly string[] EntryPointNames = new string[]
         {
-            // glXCreateContextAttribsARB
-            0x67, 0x6c, 0x58, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x41, 0x74, 0x74, 0x72, 0x69, 0x62, 0x73, 0x41, 0x52, 0x42, 0,
-            // glXSwapIntervalEXT
-            0x67, 0x6c, 0x58, 0x53, 0x77, 0x61, 0x70, 0x49, 0x6e, 0x74, 0x65, 0x72, 0x76, 0x61, 0x6c, 0x45, 0x58, 0x54, 0,
-            // glXSwapIntervalMESA
-            0x67, 0x6c, 0x58, 0x53, 0x77, 0x61, 0x70, 0x49, 0x6e, 0x74, 0x65, 0x72, 0x76, 0x61, 0x6c, 0x4d, 0x45, 0x53, 0x41, 0,
-            // glXGetSwapIntervalMESA
-            0x67, 0x6c, 0x58, 0x47, 0x65, 0x74, 0x53, 0x77, 0x61, 0x70, 0x49, 0x6e, 0x74, 0x65, 0x72, 0x76, 0x61, 0x6c, 0x4d, 0x45, 0x53, 0x41, 0,
-            // glXSwapIntervalSGI
-            0x67, 0x6c, 0x58, 0x53, 0x77, 0x61, 0x70, 0x49, 0x6e, 0x74, 0x65, 0x72, 0x76, 0x61, 0x6c, 0x53, 0x47, 0x49, 0,
+            "glXCreateContextAttribsARB",
+            "glXSwapIntervalEXT",
+            "glXSwapIntervalMESA",
+            "glXGetSwapIntervalMESA",
+            "glXSwapIntervalSGI"
         };
 
-        private static readonly int[] EntryPointOffsets = new int[5];
         private static IntPtr[] EntryPoints = new IntPtr[5];
 
         internal Glx()
@@ -280,21 +274,7 @@ namespace OpenTK.Platform.X11
             // This means we can load them without creating
             // a context first! (unlike WGL)
             _EntryPointsInstance = EntryPoints;
-            _EntryPointNamesInstance = EntryPointNames;
-            _EntryPointNameOffsetsInstance = EntryPointOffsets;
-
-            // Writing the entry point name offsets
-            // by hand is error prone. Do it in code
-            // instead:
-            int offset = 0;
-            for (int i = 0, j = 0; i < EntryPointNames.Length; i++)
-            {
-                if (EntryPointNames[i] == 0)
-                {
-                    EntryPointOffsets[j++] = offset;
-                    offset = i + 1;
-                }
-            }
+            _EntryPointNames = EntryPointNames;
         }
 
         protected override object SyncRoot { get { return sync_root; } }
@@ -302,21 +282,6 @@ namespace OpenTK.Platform.X11
         protected override IntPtr GetAddress(string funcname)
         {
             return Arb.GetProcAddress(funcname);
-        }
-
-        public override void LoadEntryPoints()
-        {
-            unsafe
-            {
-                fixed (byte* name = _EntryPointNamesInstance)
-                {
-                    for (int i = 0; i < _EntryPointsInstance.Length; i++)
-                    {
-                        _EntryPointsInstance[i] = Arb.GetProcAddress(
-                            new IntPtr(name + _EntryPointNameOffsetsInstance[i]));
-                    }
-                }
-            }
         }
 
         internal static bool SupportsFunction(string name)

@@ -36,8 +36,8 @@ namespace OpenTK.Platform
             Stopwatch time = Stopwatch.StartNew();
 
             #if OPENGL
-            new OpenTK.Graphics.OpenGL.GL().LoadEntryPoints();
-            new OpenTK.Graphics.OpenGL4.GL().LoadEntryPoints();
+            new OpenTK.Graphics.OpenGL.GL().LoadEntryPoints(this);
+            new OpenTK.Graphics.OpenGL4.GL().LoadEntryPoints(this);
             #endif
             #if OPENGLES
             new OpenTK.Graphics.ES11.GL().LoadEntryPoints();

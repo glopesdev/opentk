@@ -34,8 +34,7 @@ namespace OpenTK.Graphics
     public abstract class GraphicsBindingsBase : BindingsBase
     {
         protected IntPtr[] _EntryPointsInstance;
-        protected byte[] _EntryPointNamesInstance;
-        protected int[] _EntryPointNameOffsetsInstance;
+        protected string[] _EntryPointNames;
 
         /// <summary>
         /// Retrieves an unmanaged function pointer to the specified function.
@@ -66,26 +65,14 @@ namespace OpenTK.Graphics
         // Note: we prefer IGraphicsContextInternal.GetAddress over
         // this.GetAddress to improve loading performance (less
         // validation necessary.)
-        public override void LoadEntryPoints()
+        public override void LoadEntryPoints(IBindingsContext context)
         {
             Debug.Print("Loading entry points for {0}", GetType().FullName);
-
-            IGraphicsContext context = GraphicsContext.CurrentContext;
-            if (context == null)
-            {
-                throw new GraphicsContextMissingException();
-            }
-
-            IBindingsContext bindingsContext = context as IBindingsContext;
             unsafe
             {
-                fixed (byte* name = _EntryPointNamesInstance)
+                for (int i = 0; i < _EntryPointsInstance.Length; i++)
                 {
-                    for (int i = 0; i < _EntryPointsInstance.Length; i++)
-                    {
-                        _EntryPointsInstance[i] = bindingsContext.GetAddress(
-                            new IntPtr(name + _EntryPointNameOffsetsInstance[i]));
-                    }
+                    _EntryPointsInstance[i] = context.GetAddress(_EntryPointNames[i]);
                 }
             }
         }

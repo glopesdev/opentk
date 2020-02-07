@@ -82,10 +82,7 @@ namespace OpenTK.Graphics
         // This function is no longer used.
         // The GraphicsContext facade will
         // always call the IntPtr overload.
-        public IntPtr GetAddress(string function)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract IntPtr GetAddress(string function);
 
         public abstract IntPtr GetAddress(IntPtr function);
 

@@ -358,6 +358,16 @@ namespace OpenTK.Platform.Windows
         }
         */
 
+        public override IntPtr GetAddress(string function)
+        {
+            var address = Wgl.GetProcAddress(function);
+            if (!IsValid(address))
+            {
+                address = Functions.GetProcAddress(WinFactory.OpenGLHandle, function);
+            }
+            return address;
+        }
+
         public override IntPtr GetAddress(IntPtr function_string)
         {
             IntPtr address = Wgl.GetProcAddress(function_string);

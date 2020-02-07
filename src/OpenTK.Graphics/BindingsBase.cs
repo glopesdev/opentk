@@ -26,6 +26,7 @@
 using System;
 using System.Text;
 using System.Runtime.InteropServices;
+using OpenTK.Graphics;
 
 namespace OpenTK
 {
@@ -205,6 +206,6 @@ namespace OpenTK
             Marshal.FreeHGlobal(ptr);
         }
 
-        public abstract void LoadEntryPoints();
+        public abstract void LoadEntryPoints(IBindingsContext context);
     }
 }

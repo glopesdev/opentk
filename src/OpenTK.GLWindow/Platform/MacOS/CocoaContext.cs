@@ -361,6 +361,11 @@ namespace OpenTK
             IsDisposed = true;
         }
 
+        public override IntPtr GetAddress(string function)
+        {
+            return NS.GetAddress(function);
+        }
+
         public override IntPtr GetAddress(IntPtr function)
         {
             unsafe

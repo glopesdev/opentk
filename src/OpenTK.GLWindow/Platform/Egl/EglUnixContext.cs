@@ -95,11 +95,11 @@ namespace OpenTK.Platform.Egl
 
             Stopwatch time = Stopwatch.StartNew();
 
-            new OpenTK.Graphics.OpenGL.GL().LoadEntryPoints();
-            new OpenTK.Graphics.OpenGL4.GL().LoadEntryPoints();
-            new OpenTK.Graphics.ES11.GL().LoadEntryPoints();
-            new OpenTK.Graphics.ES20.GL().LoadEntryPoints();
-            new OpenTK.Graphics.ES30.GL().LoadEntryPoints();
+            new OpenTK.Graphics.OpenGL.GL().LoadEntryPoints(this);
+            new OpenTK.Graphics.OpenGL4.GL().LoadEntryPoints(this);
+            new OpenTK.Graphics.ES11.GL().LoadEntryPoints(this);
+            new OpenTK.Graphics.ES20.GL().LoadEntryPoints(this);
+            new OpenTK.Graphics.ES30.GL().LoadEntryPoints(this);
 
             Debug.Print("Bindings loaded in {0} ms.", time.Elapsed.TotalMilliseconds);
         }

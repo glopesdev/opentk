@@ -68,6 +68,11 @@ namespace OpenTK.Platform.Dummy
             get { return current_thread != null && current_thread == Thread.CurrentThread; }
         }
 
+        public override IntPtr GetAddress(string function)
+        {
+            return Loader(function);
+        }
+
         public override IntPtr GetAddress(IntPtr function)
         {
             string str = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(function);

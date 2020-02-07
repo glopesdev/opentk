@@ -32,11 +32,6 @@ namespace OpenTK.Platform.X11
         private readonly X11GraphicsMode ModeSelector = new X11GraphicsMode();
         private string extensions = null;
 
-        static X11GLContext()
-        {
-            new Glx().LoadEntryPoints();
-        }
-
         public X11GLContext(GraphicsMode mode, IWindowInfo window, IGraphicsContext shared, bool direct,
             int major, int minor, GraphicsContextFlags flags)
         {
@@ -459,7 +454,13 @@ namespace OpenTK.Platform.X11
             Debug.Print("Context supports adaptive vsync: {0}.",
                 vsync_tear_supported);
 
+            new Glx().LoadEntryPoints(this);
             base.LoadAll();
+        }
+
+        public override IntPtr GetAddress(string function)
+        {
+            return Glx.GetProcAddress(function);
         }
 
         public override IntPtr GetAddress(IntPtr function)

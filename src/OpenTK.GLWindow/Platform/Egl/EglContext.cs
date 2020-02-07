@@ -218,6 +218,11 @@ namespace OpenTK.Platform.Egl
             }
         }
 
+        public override IntPtr GetAddress(string function)
+        {
+            return Egl.GetProcAddress(function);
+        }
+
         public override IntPtr GetAddress(IntPtr function)
         {
             // Try loading a static export from ES1 or ES2
