@@ -15,4 +15,8 @@
     <ProjectReference Include="..\OpenTK\OpenTK.csproj" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="$(SolutionDir)src\Generator.Rewrite\bin\$(ConfigurationName)\netcoreapp3.1\Rewrite.exe -a $(TargetPath)" />
+  </Target>
+
 </Project>
