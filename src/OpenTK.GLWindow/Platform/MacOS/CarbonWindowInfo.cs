@@ -49,7 +49,7 @@ namespace OpenTK.Platform.MacOS
             this.IsControl = isControl;
         }
 
-        public CarbonWindowInfo(IntPtr windowRef, bool ownHandle, bool isControl, GetInt getX, GetInt getY) : this(windowRef, ownHandle, isControl)
+        public CarbonWindowInfo(IntPtr windowRef, bool ownHandle, bool isControl, Func<int> getX, Func<int> getY) : this(windowRef, ownHandle, isControl)
         {
             this.XOffset = getX;
             this.YOffset = getY;
@@ -81,9 +81,9 @@ namespace OpenTK.Platform.MacOS
         // (e.g. MonoGame)
         public IntPtr WindowHandle { get { return Handle; } set { Handle = value; } }
 
-        public GetInt XOffset { get; set; }
+        public Func<int> XOffset { get; set; }
 
-        public GetInt YOffset { get; set; }
+        public Func<int> YOffset { get; set; }
 
         public void Dispose()
         {

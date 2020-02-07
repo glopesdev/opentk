@@ -47,11 +47,11 @@ namespace OpenTK.Platform.MacOS
         private IWindowInfo carbonWindow;
         private IGraphicsContext dummyContext; // for extension loading
 
-        private readonly GetInt XOffset;
-        private readonly GetInt YOffset;
+        private readonly Func<int> XOffset;
+        private readonly Func<int> YOffset;
 
         public AglContext(GraphicsMode mode, IWindowInfo window, IGraphicsContext shareContext,
-            GetInt xoffset, GetInt yoffset)
+            Func<int> xoffset, Func<int> yoffset)
         {
             Debug.Print("Share context: {0}", shareContext);
             Debug.Print("Window info: {0}", window);
